@@ -3127,14 +3127,34 @@ function App() {
   const getIsMobile = () => {
     if (typeof window === "undefined") return false
 
+    // Use several signals because some mobile browsers can report a
+    // desktop-style layout viewport, especially when "Desktop site"
+    // is enabled. The physical screen width still remains small.
+    const userAgent = navigator.userAgent || ""
     const mobileUserAgent =
-      /Android|iPhone|iPad|iPod|Mobile/i.test(
-        navigator.userAgent
-      )
+      /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent)
+
+    const viewportIsSmall =
+      window.innerWidth < 768
+
+    const physicalScreenIsSmall =
+      Math.min(
+        window.screen?.width ?? window.innerWidth,
+        window.screen?.height ?? window.innerHeight
+      ) < 768
+
+    const touchMobileLayout =
+      navigator.maxTouchPoints > 0 &&
+      Math.min(
+        window.screen?.width ?? window.innerWidth,
+        window.screen?.height ?? window.innerHeight
+      ) < 1024
 
     return (
-      window.innerWidth < 768 ||
-      mobileUserAgent
+      mobileUserAgent ||
+      viewportIsSmall ||
+      physicalScreenIsSmall ||
+      touchMobileLayout
     )
   }
 
@@ -3649,7 +3669,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#111111] text-white">
+    <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#111111] text-white">
       {!isMobile && (
         <Sidebar
           page={page}
