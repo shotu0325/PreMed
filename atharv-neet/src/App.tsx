@@ -3123,6 +3123,41 @@ function AuthPage({ mode, setMode }: AuthPageProps) {
 function App() {
   const [page, setPage] =
     useState<Page>("Home")
+
+  const getIsMobile = () => {
+    if (typeof window === "undefined") return false
+
+    const mobileUserAgent =
+      /Android|iPhone|iPad|iPod|Mobile/i.test(
+        navigator.userAgent
+      )
+
+    return (
+      window.innerWidth < 768 ||
+      mobileUserAgent
+    )
+  }
+
+  const [isMobile, setIsMobile] =
+    useState(getIsMobile)
+
+  useEffect(() => {
+    const updateMobileState = () => {
+      setIsMobile(getIsMobile())
+    }
+
+    updateMobileState()
+    window.addEventListener(
+      "resize",
+      updateMobileState
+    )
+
+    return () =>
+      window.removeEventListener(
+        "resize",
+        updateMobileState
+      )
+  }, [])
   const [authMode, setAuthMode] = useState<AuthMode>("login")
   const [authLoading, setAuthLoading] = useState(true)
   const [user, setUser] = useState<Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]>(null)
@@ -3615,21 +3650,34 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#111111] text-white">
-      <Sidebar
-        page={page}
-        setPage={setPage}
-        userEmail={user.email ?? ""}
-        onLogout={async () => {
-          const { error } = await supabase.auth.signOut()
-          if (error) console.error("Error signing out:", error)
-        }}
-      />
+      {!isMobile && (
+        <Sidebar
+          page={page}
+          setPage={setPage}
+          userEmail={user.email ?? ""}
+          onLogout={async () => {
+            const { error } = await supabase.auth.signOut()
+            if (error) console.error("Error signing out:", error)
+          }}
+        />
+      )}
 
-      <main className="min-h-screen md:ml-64">
-        <MobileHeader page={page} setPage={setPage} userEmail={user.email ?? ""} onLogout={async () => {
-          const { error } = await supabase.auth.signOut()
-          if (error) console.error("Error signing out:", error)
-        }} />
+      <main
+        className={`min-h-screen ${
+          isMobile ? "" : "ml-64"
+        }`}
+      >
+        {isMobile && (
+          <MobileHeader
+            page={page}
+            setPage={setPage}
+            userEmail={user.email ?? ""}
+            onLogout={async () => {
+              const { error } = await supabase.auth.signOut()
+              if (error) console.error("Error signing out:", error)
+            }}
+          />
+        )}
         <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10">
           {page === "Home" && (
             <HomePage
