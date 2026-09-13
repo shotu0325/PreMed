@@ -3124,61 +3124,7 @@ function App() {
   const [page, setPage] =
     useState<Page>("Home")
 
-  const getIsMobile = () => {
-    if (typeof window === "undefined") return false
-
-    // Use several signals because some mobile browsers can report a
-    // desktop-style layout viewport, especially when "Desktop site"
-    // is enabled. The physical screen width still remains small.
-    const userAgent = navigator.userAgent || ""
-    const mobileUserAgent =
-      /Android|iPhone|iPad|iPod|Mobile/i.test(userAgent)
-
-    const viewportIsSmall =
-      window.innerWidth < 768
-
-    const physicalScreenIsSmall =
-      Math.min(
-        window.screen?.width ?? window.innerWidth,
-        window.screen?.height ?? window.innerHeight
-      ) < 768
-
-    const touchMobileLayout =
-      navigator.maxTouchPoints > 0 &&
-      Math.min(
-        window.screen?.width ?? window.innerWidth,
-        window.screen?.height ?? window.innerHeight
-      ) < 1024
-
-    return (
-      mobileUserAgent ||
-      viewportIsSmall ||
-      physicalScreenIsSmall ||
-      touchMobileLayout
-    )
-  }
-
-  const [isMobile, setIsMobile] =
-    useState(getIsMobile)
-
-  useEffect(() => {
-    const updateMobileState = () => {
-      setIsMobile(getIsMobile())
-    }
-
-    updateMobileState()
-    window.addEventListener(
-      "resize",
-      updateMobileState
-    )
-
-    return () =>
-      window.removeEventListener(
-        "resize",
-        updateMobileState
-      )
-  }, [])
-  const [authMode, setAuthMode] = useState<AuthMode>("login")
+    const [authMode, setAuthMode] = useState<AuthMode>("login")
   const [authLoading, setAuthLoading] = useState(true)
   const [user, setUser] = useState<Awaited<ReturnType<typeof supabase.auth.getUser>>["data"]["user"]>(null)
 
@@ -3670,7 +3616,7 @@ function App() {
 
   return (
     <div className="min-h-screen w-full min-w-0 overflow-x-hidden bg-[#111111] text-white">
-      {!isMobile && (
+      <div className="hidden md:block">
         <Sidebar
           page={page}
           setPage={setPage}
@@ -3680,14 +3626,10 @@ function App() {
             if (error) console.error("Error signing out:", error)
           }}
         />
-      )}
+      </div>
 
-      <main
-        className={`min-h-screen ${
-          isMobile ? "" : "ml-64"
-        }`}
-      >
-        {isMobile && (
+      <main className="min-h-screen md:ml-64">
+        <div className="md:hidden">
           <MobileHeader
             page={page}
             setPage={setPage}
@@ -3697,7 +3639,7 @@ function App() {
               if (error) console.error("Error signing out:", error)
             }}
           />
-        )}
+        </div>
         <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-10 md:py-10">
           {page === "Home" && (
             <HomePage
