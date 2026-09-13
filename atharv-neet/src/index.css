@@ -13,3 +13,30 @@
     margin: 0;
   }
 }
+/* Responsive mobile layout */
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  .md\:block {
+    display: none !important;
+  }
+
+  .md\:hidden {
+    display: block !important;
+  }
+
+  .md\:ml-64 {
+    margin-left: 0 !important;
+  }
+}
